@@ -202,8 +202,8 @@ pub fn install_app(
         valid_pages.push(i);
     }
 
+    let mut loader = session.target().flash_loader();
     for i in valid_pages {
-        println!("Writing page number {}", i);
         // Create the packet that we send to the bootloader
         // First four bytes are the address of the page
         let mut pkt = Vec::new();
@@ -215,7 +215,6 @@ pub fn install_app(
         {
             pkt.push(b);
         }
-        let mut loader = session.target().flash_loader();
 
         loader
             .add_data(
@@ -223,15 +222,15 @@ pub fn install_app(
                 &pkt,
             )
             .map_err(TockloaderError::ProbeRsWriteError)?;
-
-        let mut options = DownloadOptions::default();
-        options.keep_unwritten_bytes = true;
-
-        // Finally, the data can be programmed
-        loader
-            .commit(session, options)
-            .map_err(TockloaderError::ProbeRsWriteError)?;
     }
+
+    let mut options = DownloadOptions::default();
+    options.keep_unwritten_bytes = true;
+
+    // Finally, the data can be programmed
+    loader
+        .commit(session, options)
+        .map_err(TockloaderError::ProbeRsWriteError)?;
 
     Ok(())
 }
